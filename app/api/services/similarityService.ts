@@ -16,9 +16,7 @@ const calculateCosineSimilarity = (vecA: number[], vecB: number[]): number => {
   return dotProduct / (magnitudeA * magnitudeB);
 };
 
-export const findTopDestinations = async(
-  queryEmbedding: number[],
-) => {
+export const findTopDestinations = async (queryEmbedding: number[]) => {
   try {
     const destinationEmbeddings = await loadDestinationEmbeddings();
     const similarities = destinationEmbeddings.map((destination) => ({
@@ -31,10 +29,9 @@ export const findTopDestinations = async(
     }));
 
     similarities.sort((a, b) => b.similarity - a.similarity);
-    console.log("Top 5 Similar Destinations:", similarities.slice(0, 5));
-    return [similarities.slice(0, 5)];
+    return { status: 200, data: similarities.slice(0, 5) };
   } catch (error) {
     console.error("Error finding top destinations:", error);
-    return [{ status: 500, error: "Failed to find similar destinations." }];
+    return { status: 500, error: "Failed to find similar destinations." };
   }
 };
