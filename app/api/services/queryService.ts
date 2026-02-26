@@ -1,4 +1,6 @@
-import { createQueryEmbedding } from "./embeddingsService";
+import { createUserQueryEmbedding } from "./embeddingsService";
+import { loadDestinationEmbeddings, loadInventory } from "./inventoryService";
+import { findTopDestinations } from "./similarityService";
 
 interface processQueryResponse {
   status: number;
@@ -17,10 +19,18 @@ export const processQuery = async (
       error: validationResponse.error,
     };
   } else if (validationResponse.status === 200) {
-    const embeddingResponse = await createQueryEmbedding(query);
+    const embeddingResponse = await createUserQueryEmbedding(query);
+    if (embeddingResponse.status === 200) {
+      const topDestinations = await findTopDestinations(embeddingResponse.data.embedding);
+      console.log("Top Destinations:", topDestinations);
+      return {
+        status: 200,
+        message: "Query processed successfully.",
+      };
+    }
     return {
-      status: validationResponse.status,
-      message: validationResponse.message,
+      status: embeddingResponse.status,
+      message: embeddingResponse.message,
     };
   }
   return { status: 500, error: "Unknown error occurred." };
@@ -40,5 +50,3 @@ const validateQuery = (query: string) => {
 
   return { status: 200, message: `You searched for: ${query}` };
 };
-
-
