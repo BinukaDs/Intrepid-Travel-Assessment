@@ -22,17 +22,32 @@ export const processQuery = async (
   } else if (validationResponse.status === 200) {
     const embeddingResponse = await createUserQueryEmbedding(query);
     if (embeddingResponse.status === 200) {
+      if (!embeddingResponse.data || !embeddingResponse.data.embedding) {
+        return {
+          status: 500,
+          error: "Embedding data is missing.",
+        };
+      }
       const topDestinations = await findTopDestinations(
         embeddingResponse.data.embedding
       );
-      const llmResponse = await getLlmResponse(query, topDestinations.data);
-      console.log("Top Destinations:", llmResponse);
-      return {
-        status: 200,
-        message: `Query processed successfully: Response: ${JSON.stringify(
-          llmResponse
-        )}`,
-      };
+
+      const llmResponse = await getLlmResponse(query, topDestinations.data ?? []);
+      const finalResponse = await generateFinalResponse(llmResponse);
+
+      console.log("matched: ", JSON.stringify(finalResponse.message));
+
+      if (finalResponse.status === 200) {
+        return {
+          status: finalResponse.status,
+          message: JSON.stringify(finalResponse.message),
+        };
+      } else {
+        return {
+          status: finalResponse.status,
+          error: finalResponse.error,
+        };
+      }
     }
     return {
       status: embeddingResponse.status,
@@ -40,6 +55,34 @@ export const processQuery = async (
     };
   }
   return { status: 500, error: "Unknown error occurred." };
+};
+
+export const generateFinalResponse = async (
+  response: [{ id: number; reason: string }]
+) => {
+  // console.log("LLM Response:", response);
+
+  const destinations = await loadInventory();
+  const matchedResults = Array.isArray(response)
+    ? response
+        .map((res) => {
+          const destination = destinations.find(
+            (d: { id: number }) => d.id === res.id
+          );
+          if (!destination) return null;
+          return {
+            ...destination,
+            reason: res.reason,
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  if (matchedResults.length > 0) {
+    return { status: 200, message: matchedResults };
+  } else {
+    return { status: 400, error: "No matching results found." };
+  }
 };
 
 const validateQuery = (query: string) => {

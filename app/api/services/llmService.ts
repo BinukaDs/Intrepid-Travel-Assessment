@@ -20,43 +20,14 @@ const fetchLlm = async (query: string) => {
     });
     return {
       status: 200,
-      response: response.candidates[0].content.parts[0].text,
+      response: response.candidates?.[0]?.content?.parts?.[0]?.text ?? "",
     };
   } catch (error) {
     return { status: 500, error: "Failed to fetch LLM response." };
   }
 };
 
-export const getLlmResponse = async (query: string, topDestinations: []) => {
-  //   console.log(topDestinations.map((d) => `{id: ${d.id}, query: "${d.text}"}`));
-
-  //   const prompt = `You are a helpful travel assistant. When given a user question and the best matching destinations with their corresponding IDs,
-  //       you must find the most suitable destination/destinations only from the provided destinations and
-
-  //       When deciding:
-  //       - consider the best destinations mostly based on the user's interest
-  //       - prioritize destinations that align with the user's budget.
-  //       - choose only 3 maximum destinations as the best matches.
-
-  //       Your response must:
-  //       - contain the ID of the destination/destinations that best match the user query.
-  //       - A brief explanation(30 words max) of why they match.
-  //       - If there are more than 1 destinations, separate them with a line break.
-  //       - Format the JSON answer like this:
-  //           {id: 1, reason: "Yala is the best destination for <user's interests> because of <brief reason> <price if user mentions their budget>"}
-  //           {id: 2, reason: "Galle Fort is the best destination for <user's interests> because of <brief reason> <price if user mentions their budget>"}
-  //       - Provide the answer in JSON format.
-  //       - Do not summarize or guess destinations that are not in the provided list.
-  //       - If the answer is not found, respond with: "No suitable destination found for the query"
-
-  //       User Query: ${query}
-
-  //     Best Matching Destinations:
-  //     ${topDestinations
-  //       .map((d) => `{id: ${d.id}, description: "${d.text}"}`)
-  //       .join("\n")}
-
-  //       .`;
+export const getLlmResponse = async (query: string, topDestinations: { id: number; text: string; similarity: number }[]) => {
 
   const prompt = `
     You are a helpful travel assistant. Given a user query and a list of destinations, 
@@ -80,14 +51,15 @@ User Query: ${query}
 Destinations:
 ${topDestinations
   .map(
-    (d: { id: string; text: string }) =>
+    (d: { id: number; text: string }) =>
       `{id: ${d.id}, description: "${d.text}"}`
   )
   .join("\n")}
 `;
 
   const llmResponse = await fetchLlm(prompt);
-  const formattedResponse = formatLlmResponse(llmResponse.response);
+  // console.log("LLM: ", llmResponse)
+  const formattedResponse = formatLlmResponse(llmResponse.response ?? "");
   const validationResponse = validateSchema(topDestinations, formattedResponse);
 
   if (validationResponse.status !== 200) {
@@ -113,7 +85,7 @@ const formatLlmResponse = (response: string) => {
   }
 };
 
-const validateSchema = (topDestinations: [], llmResponse: string) => {
+const validateSchema = (topDestinations: { id: number }[], llmResponse: string) => {
   const validIds = topDestinations.map((d: { id: number }) => d.id);
 
   // Validate LLM response

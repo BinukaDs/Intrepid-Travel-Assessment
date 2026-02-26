@@ -1,3 +1,4 @@
+import { Destination, DestinationEmbedding } from "../types";
 import { loadInventory, saveToInventory } from "./inventoryService";
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -25,7 +26,11 @@ const createEmbedding = async (input: string) => {
 export const createUserQueryEmbedding = async (query: string) => {
   try {
     const embedding = await createEmbedding(query);
-    return { status: 200,message: "Created user query embedding successfully.", data: { userQuery: query, embedding: embedding } };
+    return {
+      status: 200,
+      message: "Created user query embedding successfully.",
+      data: { userQuery: query, embedding: embedding },
+    };
   } catch (error) {
     console.log("Error creating embedding:", error);
     return {
@@ -37,10 +42,10 @@ export const createUserQueryEmbedding = async (query: string) => {
 
 export const createDocumentEmbedding = async () => {
   try {
-    const destinations = await loadInventory();
+    const destinations: Destination[] = await loadInventory();
     const formattedDestinations = formatDestinations(destinations);
 
-    const embeddingsWithIds = [];
+    const embeddingsWithIds: DestinationEmbedding[] = [];
     for (const destination of formattedDestinations) {
       const embedding = await createEmbedding(destination.text);
       embeddingsWithIds.push({
@@ -62,7 +67,7 @@ export const createDocumentEmbedding = async () => {
   }
 };
 
-const formatDestinations = (destinations: []) => {
+const formatDestinations = (destinations: Destination[]) => {
   function getPriceCategory(price: number) {
     if (price <= 50) return "budget-friendly";
     else if (price <= 100) return "affordable";

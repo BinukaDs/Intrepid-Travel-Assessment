@@ -1,7 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
+import { Destination, DestinationEmbedding } from "../types";
 
-export const loadInventory = async () => {
+export const loadInventory: () => Promise<Destination[]> = async () => {
   try {
     const filePath = path.join(process.cwd(), "app/data/destinations.json");
     const data = await fs.readFile(filePath, "utf-8");
@@ -13,7 +14,10 @@ export const loadInventory = async () => {
   }
 };
 
-export const saveToInventory = async (fileName: string, data: []) => {
+export const saveToInventory = async (
+  fileName: string,
+  data: DestinationEmbedding[]
+) => {
   try {
     const filePath = path.join(process.cwd(), `app/data/${fileName}.json`);
     await fs.writeFile(filePath, JSON.stringify(data, null, 2));
@@ -22,7 +26,9 @@ export const saveToInventory = async (fileName: string, data: []) => {
   }
 };
 
-export const loadDestinationEmbeddings = async () => {
+export const loadDestinationEmbeddings: () => Promise<
+  DestinationEmbedding[]
+> = async () => {
   try {
     const filePath = path.join(
       process.cwd(),
@@ -33,6 +39,6 @@ export const loadDestinationEmbeddings = async () => {
     return JSON.parse(data);
   } catch (error) {
     console.error("Error loading destination embeddings:", error);
-    return [{status: 500, error: "Failed to load destination embeddings." }];
+    return [{ status: 500, error: "Failed to load destination embeddings." }];
   }
 };
