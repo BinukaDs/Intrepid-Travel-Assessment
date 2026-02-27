@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { Destination, DestinationEmbedding } from "../types";
 
+// load inventory data from json file
 export const loadInventory: () => Promise<Destination[]> = async () => {
   try {
     const filePath = path.join(process.cwd(), "app/data/destinations.json");
@@ -14,6 +15,7 @@ export const loadInventory: () => Promise<Destination[]> = async () => {
   }
 };
 
+// save data to json file (for saving destination embeddings)
 export const saveToInventory = async (
   fileName: string,
   data: DestinationEmbedding[]
@@ -26,6 +28,7 @@ export const saveToInventory = async (
   }
 };
 
+// load destination embeddings from json file
 export const loadDestinationEmbeddings: () => Promise<
   DestinationEmbedding[]
 > = async () => {

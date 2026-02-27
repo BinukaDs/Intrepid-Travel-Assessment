@@ -1,3 +1,4 @@
+// Frontend types
 export interface ResultItem {
   id: string | number;
   title: string;

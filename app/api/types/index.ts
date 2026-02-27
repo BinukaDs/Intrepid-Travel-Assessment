@@ -1,4 +1,4 @@
-// Centralized types for backend services
+//backend services types
 
 export interface Destination {
   id: number;
@@ -28,4 +28,6 @@ export interface processQueryResponse {
   message?: string;
   error?: string;
 }
+
+
 
