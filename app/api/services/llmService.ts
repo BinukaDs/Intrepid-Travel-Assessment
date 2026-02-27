@@ -10,6 +10,7 @@ const llmResponseSchema = z.array(
   })
 );
 
+// fetch LLM response based on user query and top destinations
 const fetchLlm = async (query: string) => {
   const ai = new GoogleGenAI({ apiKey });
   try {
@@ -27,6 +28,7 @@ const fetchLlm = async (query: string) => {
   }
 };
 
+// fetch LLM response based on user query and top destinations, then validate and format the response
 export const getLlmResponse = async (query: string, topDestinations: { id: number; text: string; similarity: number }[]) => {
 
   const prompt = `
@@ -85,18 +87,18 @@ const formatLlmResponse = (response: string) => {
   }
 };
 
+// Validate LLM response
 const validateSchema = (topDestinations: { id: number }[], llmResponse: string) => {
   const validIds = topDestinations.map((d: { id: number }) => d.id);
 
-  // Validate LLM response
   let parsedResults;
-//   console.log("LLM Response:", llmResponse);
+
   
   try {
     // console.log("Valid IDs:", validationSchema);
     parsedResults = llmResponseSchema.parse(llmResponse);
 
-    // Filter out any results with invalid IDs
+    // Filter out any results with invalid ids
     parsedResults = parsedResults.filter((r) => validIds.includes(r.id));
     return { status: 200, data: parsedResults };
   } catch (e) {

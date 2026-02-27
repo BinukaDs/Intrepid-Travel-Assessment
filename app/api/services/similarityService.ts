@@ -1,5 +1,6 @@
 import { loadDestinationEmbeddings } from "./inventoryService";
 
+// Calculate cosine similarity between two vectors
 const calculateCosineSimilarity = (vecA: number[], vecB: number[]): number => {
   if (vecA.length !== vecB.length) {
     throw new Error("Vectors must be of the same length");
@@ -16,6 +17,7 @@ const calculateCosineSimilarity = (vecA: number[], vecB: number[]): number => {
   return dotProduct / (magnitudeA * magnitudeB);
 };
 
+// Find top 5 most similar destinations based on cosine similarity of embeddings
 export const findTopDestinations = async (queryEmbedding: number[]) => {
   try {
     const destinationEmbeddings = await loadDestinationEmbeddings();
