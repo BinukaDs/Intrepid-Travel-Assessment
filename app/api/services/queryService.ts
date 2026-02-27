@@ -2,13 +2,9 @@ import { createUserQueryEmbedding } from "./embeddingsService";
 import { loadDestinationEmbeddings, loadInventory } from "./inventoryService";
 import { getLlmResponse } from "./llmService";
 import { findTopDestinations } from "./similarityService";
+import { processQueryResponse } from "../types";
 
-interface processQueryResponse {
-  status: number;
-  message?: string;
-  error?: string;
-}
-
+// Main function to process user query and return matched destinations with reasons
 export const processQuery = async (
   query: string
 ): Promise<processQueryResponse> => {
@@ -35,7 +31,7 @@ export const processQuery = async (
       const llmResponse = await getLlmResponse(query, topDestinations.data ?? []);
       const finalResponse = await generateFinalResponse(llmResponse);
 
-      console.log("matched: ", JSON.stringify(finalResponse.message));
+      // console.log("matched: ", JSON.stringify(finalResponse.message));
 
       if (finalResponse.status === 200) {
         return {
@@ -57,6 +53,7 @@ export const processQuery = async (
   return { status: 500, error: "Unknown error occurred." };
 };
 
+// generate final response by matching LLM results with inventory data and formatting the output
 export const generateFinalResponse = async (
   response: [{ id: number; reason: string }]
 ) => {
@@ -85,6 +82,8 @@ export const generateFinalResponse = async (
   }
 };
 
+
+// validate user query input
 const validateQuery = (query: string) => {
   if (query === "" || query === undefined || query === null) {
     return { status: 400, error: "Query cannot be empty." };

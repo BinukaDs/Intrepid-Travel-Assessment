@@ -6,6 +6,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey });
 
+// Helper function to create embedding for any given input text
 const createEmbedding = async (input: string) => {
   const response = await ai.models.embedContent({
     model: "gemini-embedding-001",
@@ -23,6 +24,7 @@ const createEmbedding = async (input: string) => {
   }
 };
 
+// create embedding for user query
 export const createUserQueryEmbedding = async (query: string) => {
   try {
     const embedding = await createEmbedding(query);
@@ -40,6 +42,7 @@ export const createUserQueryEmbedding = async (query: string) => {
   }
 };
 
+// create embedding for each destination document and save to inventory
 export const createDocumentEmbedding = async () => {
   try {
     const destinations: Destination[] = await loadInventory();
